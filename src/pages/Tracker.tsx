@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { Activity, TrendingUp, Heart, Brain } from "lucide-react";
+import { Activity, TrendingUp, Heart, Brain, Play, Clock } from "lucide-react";
+import { useState } from "react";
 
 const emotionData = [
   { emotion: "Calm", count: 12, color: "bg-calm-primary", intensity: 70 },
@@ -28,6 +29,23 @@ const insights = [
 ];
 
 export default function Tracker() {
+  const [replaying, setReplaying] = useState(false);
+  const [replayIndex, setReplayIndex] = useState(0);
+
+  const handleReplay = () => {
+    setReplaying(true);
+    setReplayIndex(0);
+    const interval = setInterval(() => {
+      setReplayIndex((i) => {
+        if (i >= 34) {
+          clearInterval(interval);
+          setReplaying(false);
+          return 34;
+        }
+        return i + 1;
+      });
+    }, 120);
+  };
   return (
     <div className="min-h-screen p-4 md:p-8 pt-20 md:pt-24 pb-24 bg-ambient-gradient">
       <div className="container mx-auto max-w-6xl space-y-8 animate-fade-in">
@@ -48,6 +66,12 @@ export default function Tracker() {
           <div className="flex items-center gap-2 mb-6">
             <Activity className="h-5 w-5 text-primary" />
             <h2 className="text-2xl font-semibold">Emotional Waves</h2>
+            <div className="ml-auto flex items-center gap-3">
+              <button onClick={handleReplay} className="glass p-2 rounded-md" aria-pressed={replaying} title="Replay emotion timeline">
+                <Play className="h-4 w-4" /> Replay
+              </button>
+              <div className="text-sm text-muted-foreground flex items-center gap-1"><Clock className="h-4 w-4"/> {replaying ? 'Playing' : 'Idle'}</div>
+            </div>
           </div>
           
           <div className="space-y-6">

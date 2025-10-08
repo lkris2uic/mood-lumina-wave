@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Volume2 } from "lucide-react";
@@ -47,12 +47,48 @@ const sounds: Sound[] = [
 export default function Soundscape() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [volume, setVolume] = useState([70]);
+  const audioRef = useRef<Record<string, HTMLAudioElement | null>>({});
+
+  useEffect(() => {
+    // preload audio elements (placeholder silence or sample URLs could be used)
+    sounds.forEach((s) => {
+      if (!audioRef.current[s.id]) {
+        // NOTE: In a real app these would be remote URLs or locally bundled audio files
+        const a = new Audio();
+        a.loop = true;
+        a.volume = volume[0] / 100;
+        audioRef.current[s.id] = a;
+      }
+    });
+
+    return () => {
+      Object.values(audioRef.current).forEach((a) => a?.pause());
+    };
+  }, []);
+
+  useEffect(() => {
+    Object.values(audioRef.current).forEach((a) => {
+      if (a) a.volume = volume[0] / 100;
+    });
+  }, [volume]);
 
   const toggleSound = (soundId: string) => {
     if (playing === soundId) {
+      audioRef.current[soundId]?.pause();
       setPlaying(null);
       toast.info("Sound paused");
     } else {
+      // pause any other
+      Object.entries(audioRef.current).forEach(([id, a]) => {
+        if (id !== soundId) a?.pause();
+      });
+      const a = audioRef.current[soundId];
+      if (a) {
+        a.play().catch(() => {
+          // autoplay might be blocked; inform user
+          toast.error("Unable to autoplay; user interaction required to start audio.");
+        });
+      }
       setPlaying(soundId);
       toast.success("Playing ambient sound");
     }

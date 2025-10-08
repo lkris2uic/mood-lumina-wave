@@ -3,6 +3,7 @@ import { MoodSphere } from "@/components/MoodSphere";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import ambientBg from "@/assets/ambient-bg.jpg";
+import usePreferences from "@/hooks/usePreferences";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Main content */}
+  {/* Main content */}
       <div className="relative z-10 flex flex-col items-center space-y-8 max-w-4xl mx-auto text-center animate-fade-in">
         {/* Greeting */}
         <div className="space-y-2 animate-slide-up">
@@ -59,11 +60,14 @@ export default function Home() {
 
         {/* MoodSphere */}
         <div className="py-8">
-          <MoodSphere mood="calm" />
+          {(() => {
+            const prefs = usePreferences();
+            return <MoodSphere mood="calm" interactive={true} allowSound={prefs.ambientSounds} autoCycle={true} />;
+          })()}
+          <div className="text-sm text-muted-foreground mt-3">Tip: click the orb or press Enter/Space when focused to deepen the breathing.</div>
         </div>
-
         {/* Today's emotion summary */}
-        <div className="glass rounded-3xl p-6 md:p-8 max-w-lg backdrop-blur-xl animate-breathe">
+        <div className="glass rounded-3xl p-6 md:p-8 max-w-lg backdrop-blur-xl animate-breathe" role="region" aria-label="Today's emotional tone">
           <div className="flex items-center justify-center gap-2 mb-3">
             <Sparkles className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Today's Reflection</h2>
@@ -98,6 +102,30 @@ export default function Home() {
         <p className="text-sm text-muted-foreground pt-8 animate-pulse">
           Your data stays private. Always.
         </p>
+      </div>
+
+      {/* Feature highlights (below fold) */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto mt-16 px-6 md:px-0">
+        <div className="flex flex-col md:flex-row gap-6 items-stretch">
+          {[
+            { title: "Reflect Deeply", emoji: "🪞", desc: "Adaptive AI-guided journaling that listens and evolves with you." },
+            { title: "Visualize Emotions", emoji: "🌈", desc: "Watch your feelings transform into glowing patterns and light." },
+            { title: "Find Your Sound", emoji: "🎧", desc: "Ambient soundscapes that mirror your emotional rhythm." },
+            { title: "Track Gently", emoji: "📊", desc: "Your emotional trends, visualized as living art." },
+          ].map((f) => (
+            <div key={f.title} className="flex-1 glass p-6 rounded-2xl backdrop-blur-lg hover:scale-[1.02] transform transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="text-3xl" aria-hidden>
+                  {f.emoji}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{f.desc}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

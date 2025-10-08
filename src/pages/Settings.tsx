@@ -4,8 +4,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Shield, Bell, Palette, Download, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
+import { MoodSphere } from "@/components/MoodSphere";
+import usePreferences from "@/hooks/usePreferences";
 
 export default function Settings() {
+  const prefs = usePreferences();
+  const { ambientSounds, setAmbientSounds } = prefs;
+  const [animations, setAnimations] = useState(true);
+  const [previewMood, setPreviewMood] = useState<"calm"|"joyful"|"reflective"|"energy"|"peaceful">("calm");
   const handleExportData = () => {
     toast.success("Data export started", {
       description: "Your journal entries will be downloaded shortly",
@@ -108,7 +115,7 @@ export default function Settings() {
                   Start with gentle background sounds
                 </p>
               </div>
-              <Switch id="ambient-sounds" />
+              <Switch id="ambient-sounds" checked={ambientSounds} onCheckedChange={(v) => setAmbientSounds(Boolean(v))} />
             </div>
 
             <div className="flex items-center justify-between">
@@ -118,8 +125,24 @@ export default function Settings() {
                   Enable breathing and floating effects
                 </p>
               </div>
-              <Switch id="animations" defaultChecked />
+              <Switch id="animations" checked={animations} onCheckedChange={(v) => setAnimations(Boolean(v))} />
             </div>
+          </div>
+        </Card>
+
+        {/* MoodSphere preview */}
+        <Card className="glass border-2 p-6 flex items-center gap-6">
+          <div>
+            <h3 className="font-semibold mb-2">Mood Preview</h3>
+            <p className="text-sm text-muted-foreground">Select a mood to preview the MoodSphere.</p>
+            <div className="flex gap-2 mt-3">
+              {(["calm","joyful","reflective","energy","peaceful"] as const).map((m) => (
+                <Button key={m} variant={previewMood===m?undefined:'outline'} onClick={() => setPreviewMood(m)} className="rounded-full">{m}</Button>
+              ))}
+            </div>
+          </div>
+          <div className="ml-auto">
+            <MoodSphere mood={previewMood} autoCycle={animations} />
           </div>
         </Card>
 
